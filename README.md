@@ -1,6 +1,6 @@
 # PCR-99: A Practical Method for Point Cloud Registration with 99% Outliers
 
-MATLAB implementation of our work "PCR-99: A Practical Method for Point Cloud Registration with 99% Outliers".
+MATLAB implementation of our work **"PCR-99: A Practical Method for Point Cloud Registration with 99% Outliers"**.
 
 There are four different versions:
 1. **PCR99a**: Unknown scale, With sample ordering
