@@ -1,52 +1,39 @@
 function [R_final, t_final] = PCR99c(xyz_gt,xyz_est, sigma, thr1, thr2, n_hypo, scale)
  
   
+    
+    idx_inliers = [];
+    
+    
     % 1. Construct the log ratio matrix:
 
     n = size(xyz_gt, 2);
     
-    log_ratio_mat = nan(n,n);
-    log_ratio_fail_mat = zeros(n,n);
+    large_error_mat = zeros(n,n);
+
     log_ratio_gt = log(scale);
-    
-    idx_inliers = [];
-    
-    for i = 1:n-1
+    costs = nan(1,n);
+        
+    for i = 1:n
         p_gt_i = xyz_gt(:,i);
         p_est_i = xyz_est(:,i);
-
-        for j = i+1:n
-            p_gt_j = xyz_gt(:,j);
-            p_est_j = xyz_est(:,j);
-
-            v_gt_ij = p_gt_i - p_gt_j;
-            v_est_ij = p_est_i - p_est_j;
-
-            d_gt_ij = norm(v_gt_ij);
-            d_est_ij = norm(v_est_ij);
-
-            log_ratio_mat(i,j) = log(d_est_ij/d_gt_ij);
-            log_ratio_mat(j,i) = log_ratio_mat(i,j);
-            
-            log_ratio_diff = abs(log_ratio_mat(i,j) - log_ratio_gt);
-            
-            if (log_ratio_diff > thr1)
-                log_ratio_fail_mat(i,j) = 1;
-                log_ratio_fail_mat(j,i) = 1;
-            end
-
-        end
-    end
-
-    
-    % 2. Score the correspondences:
-
-    costs = nan(1,n);
-    for i = 1:n
-        lr_mat = log_ratio_mat(i,:);
+        
+        d_gt = xyz_gt - p_gt_i;
+        d_est = xyz_est - p_est_i;
+        
+        d_gt = sum(d_gt.^2, 1);
+        d_est = sum(d_est.^2, 1);
+        
+        lr_mat = 0.5*log(d_est./d_gt);
+        
+        % 2. Score the correspondences:
         r = abs(lr_mat - log_ratio_gt);
-        r(r>thr1) = thr1;
+        large_error_bool = r > thr1;
+        r(large_error_bool) = thr1;
         costs(i) = nansum(r);
+        
+        large_error_mat(i, large_error_bool) = 1;
+        
     end
 
     % 3. Sort the correspondences:
@@ -93,9 +80,9 @@ function [R_final, t_final] = PCR99c(xyz_gt,xyz_est, sigma, thr1, thr2, n_hypo, 
                 k_old = sort_idx(k);
                 
                 % Prescreening test:
-                if (log_ratio_fail_mat(i_old,j_old) ...
-                        || log_ratio_fail_mat(j_old,k_old) ...
-                        || log_ratio_fail_mat(k_old,i_old))
+                if (large_error_mat(i_old,j_old) ...
+                        || large_error_mat(j_old,k_old) ...
+                        || large_error_mat(k_old,i_old))
                     continue;
                 end
 

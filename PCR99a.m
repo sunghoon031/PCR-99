@@ -1,5 +1,7 @@
 function [s_final, R_final, t_final] = PCR99a(xyz_gt,xyz_est, sigma, thr1, thr2, n_hypo)
  
+
+
     % 1. Construct the log ratio matrix:
     
     n = size(xyz_est, 2);
@@ -8,24 +10,17 @@ function [s_final, R_final, t_final] = PCR99a(xyz_gt,xyz_est, sigma, thr1, thr2,
     
     idx_inliers = [];
         
-    for i = 1:n-1
+    for i = 1:n
         p_gt_i = xyz_gt(:,i);
         p_est_i = xyz_est(:,i);
 
-        for j = i+1:n
-            p_gt_j = xyz_gt(:,j);
-            p_est_j = xyz_est(:,j);
-
-            v_gt_ij = p_gt_i - p_gt_j;
-            v_est_ij = p_est_i - p_est_j;
-
-            d_gt_ij = norm(v_gt_ij);
-            d_est_ij = norm(v_est_ij);
-
-            log_ratio_mat(i,j) = log(d_est_ij/d_gt_ij);
-            log_ratio_mat(j,i) = log_ratio_mat(i,j);
-
-        end
+        d_gt = xyz_gt - p_gt_i;
+        d_est = xyz_est - p_est_i;
+        
+        d_gt = sum(d_gt.^2, 1);
+        d_est = sum(d_est.^2, 1);
+        
+        log_ratio_mat(i,:) = 0.5*log(d_est./d_gt);
     end
 
 
