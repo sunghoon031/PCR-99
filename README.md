@@ -10,6 +10,7 @@ There are four different versions:
 3. **PCR99c**: Known scale, With sample ordering
 4. **PCR99d**: Known scale, With random sampling (NOT RECOMMENDED!)
 
+Our Python implementation (using PyTorch) for PCR99c is available [here](https://github.com/sunghoon031/PCR-99-python).
 
 ### Quick Start:
 
